@@ -1,0 +1,5 @@
+add_subdirectory(FileLoader)
+add_subdirectory(CalculationsHistoryParser)
+add_subdirectory(ExpressionParser)
+add_subdirectory(ExpressionCalculatorWidget)
+add_subdirectory(CalculatorApp)

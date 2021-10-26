@@ -1,0 +1,10 @@
+#modernize-pass-by-value,
+Checks: '
+-cppcoreguidelines-owning-memory,
+'
+
+WarningsAsErrors: '
+-cppcoreguidelines-owning-memory,
+'
+
+InheritParentConfig: true

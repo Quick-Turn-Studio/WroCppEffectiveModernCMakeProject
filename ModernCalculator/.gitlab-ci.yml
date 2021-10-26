@@ -1,0 +1,161 @@
+variables:
+    GIT_SUBMODULE_STRATEGY: normal
+    GIT_CLONE_PATH: $CI_BUILDS_DIR/calculator/$CI_PIPELINE_ID/$CI_CONCURRENT_ID
+
+stages:
+    - code-checks
+    - develop-builds
+    - production-builds
+    - cleanup
+
+code formatting check:
+    stage: code-checks
+    tags:
+        - ubuntu
+    script:
+        - cd src
+        - curl -OL https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py
+        - chmod +x run-clang-format.py
+        - ./run-clang-format.py . --recursive --color always
+
+code inspection check:
+    stage: code-checks
+    tags:
+        - ubuntu
+    script:
+        - mkdir debug-build
+        - cd debug-build
+        - mkdir install-dir
+        - conan install .. --build=missing
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_INSTALL_PREFIX=./install-dir
+            -DCMAKE_PREFIX_PATH=/home/gitlab-runner/Qt/5.15.6/gcc_64
+            -DCALCULATOR_USE_COMPILE_CACHE=OFF
+            -DCALCULATOR_BUILD_VERSION=$CI_PIPELINE_ID
+            -DCALCULATOR_PERFORM_CODE_INSPECTION=ON
+        - cmake --build . --target RunCodeInspection
+
+.ubuntu-build-base:
+    tags:
+        - ubuntu
+
+Ubuntu:Debug build:
+    extends: .ubuntu-build-base
+    stage: develop-builds
+    needs: []
+    script:
+        - mkdir debug-build
+        - cd debug-build
+        - mkdir install-dir
+        - conan install .. --build=missing
+        - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_INSTALL_PREFIX=./install-dir
+            -DCMAKE_PREFIX_PATH=/home/gitlab-runner/Qt/5.15.6/gcc_64
+            -DCALCULATOR_BUILD_VERSION=$CI_PIPELINE_ID
+            -DCALCULATOR_USE_COMPILE_CACHE=ON
+        - cmake --build . --target all
+        - cmake --build . --target RunAllTests
+        - cmake --build . --target CreateInstaller
+
+Ubuntu:Production build:
+    extends: .ubuntu-build-base
+    stage: production-builds
+    needs: []
+    script:
+        - mkdir production-build
+        - cd production-build
+        - mkdir install-dir
+        - conan install .. --build=missing
+        - cmake .. -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=./install-dir
+            -DCMAKE_PREFIX_PATH=/home/gitlab-runner/Qt/5.15.6/gcc_64
+            -DCALCULATOR_BUILD_VERSION=$CI_PIPELINE_ID
+            -DCALCULATOR_USE_COMPILE_CACHE=ON
+        - cmake --build . --target all
+        - cmake --build . --target RunAllTests
+        - cmake --build . --target CreateInstaller
+
+.windows-build-base:
+    tags:
+        - windows
+
+Windows:Debug build:
+    extends: .windows-build-base
+    stage: develop-builds
+    needs: []
+    script:
+        - Import-Module "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
+        - Enter-VsDevShell ae81d810 -DevCmdArguments '-arch=x64 -no_logo'
+        - mkdir debug-build
+        - cd debug-build
+        - mkdir install-dir
+        - conan install .. --build=missing
+            -s os=Windows
+            -s os_build=Windows
+            -s arch=x86_64
+            -s arch_build=x86_64
+            -s build_type=Debug
+            -s compiler="Visual Studio"
+            -s compiler.version=16
+        - cmake .. -G Ninja
+            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_INSTALL_PREFIX=./install-dir
+            -DCMAKE_PREFIX_PATH=C:/Qt/5.15.2/msvc2019_64
+            -DCALCULATOR_BUILD_VERSION=$CI_PIPELINE_ID
+            -DCALCULATOR_USE_COMPILE_CACHE=ON
+        - cmake --build . --target all
+        - cmake --build . --target RunAllTests
+        - cmake --build . --target CreateInstaller
+
+Windows:Production build:
+    extends: .windows-build-base
+    stage: production-builds
+    needs: []
+    script:
+        - Import-Module "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
+        - Enter-VsDevShell ae81d810 -DevCmdArguments '-arch=x64 -no_logo'
+        - mkdir production-build
+        - cd production-build
+        - mkdir install-dir
+        - conan install .. --build=missing
+            -s os=Windows
+            -s os_build=Windows
+            -s arch=x86_64
+            -s arch_build=x86_64
+            -s build_type=Release
+            -s compiler="Visual Studio"
+            -s compiler.version=16
+        - cmake .. -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=./install-dir
+            -DCMAKE_PREFIX_PATH=C:/Qt/5.15.2/msvc2019_64
+            -DCALCULATOR_BUILD_VERSION=$CI_PIPELINE_ID
+            -DCALCULATOR_USE_COMPILE_CACHE=ON
+        - cmake --build . --target all
+        - cmake --build . --target RunAllTests
+        - cmake --build . --target CreateInstaller
+
+Windows:clean:
+    when: always
+    stage: cleanup
+    dependencies: []
+    tags:
+        - windows
+    script:
+        - echo "Time to clean up"
+    after_script:
+        - cd $CI_BUILDS_DIR
+        - Remove-Item $CI_BUILDS_DIR/calculator/$CI_PIPELINE_ID -Recurse -Force
+
+Ubuntu:clean:
+    when: always
+    stage: cleanup
+    dependencies: []
+    tags:
+        - ubuntu
+    script:
+        - echo "Time to clean up"
+    after_script:
+        - cd $CI_BUILDS_DIR
+        - rm -rf $CI_BUILDS_DIR/calculator/$CI_PIPELINE_ID
