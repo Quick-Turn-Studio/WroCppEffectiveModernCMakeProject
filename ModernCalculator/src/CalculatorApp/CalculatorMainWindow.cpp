@@ -1,7 +1,3 @@
-//
-// Created by grabusrqts on 23.10.2021.
-//
-
 #include "CalculatorMainWindow.h"
 
 #include <CalculatorWidget.h>

@@ -1,4 +1,5 @@
 set(CALCULATOR_BUILD_VERSION "0" CACHE STRING "Build version")
+set(CALCULATOR_SHOULD_BE_NICE "OFF" CACHE BOOL "We are nice")
 
 project(CalculatorApplication LANGUAGES CXX VERSION 1.0.$CACHE{CALCULATOR_BUILD_VERSION})
 
@@ -9,6 +10,11 @@ set(APP_NAME Calculator)
 aux_source_directory(. SRC_FILES)
 
 add_executable(${APP_NAME} MACOSX_BUNDLE ${SRC_FILES})
+
+target_compile_definitions(${APP_NAME} PRIVATE CALCULATOR_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(${APP_NAME} PRIVATE CALCULATOR_BUILD_TYPE="$<CONFIG>")
+
+target_compile_definitions(${APP_NAME} PRIVATE CALCULATOR_IS_NICE=$<BOOL:$CACHE{CALCULATOR_SHOULD_BE_NICE}>)
 
 target_link_libraries(${APP_NAME} PRIVATE Qt5::Widgets)
 target_link_libraries(${APP_NAME} PUBLIC ExpressionCalculatorWidget)
