@@ -1,0 +1,14 @@
+#modernize-pass-by-value,
+Checks: '
+cppcoreguidelines-*,
+'
+
+WarningsAsErrors: '
+cppcoreguidelines-*,
+-cppcoreguidelines-owning-memory,
+'
+
+HeaderFilterRegex: '[A-Z][A-Za-z0-9]*\.h'
+AnalyzeTemporaryDtors: false
+InheritParentConfig: false
+FormatStyle: file

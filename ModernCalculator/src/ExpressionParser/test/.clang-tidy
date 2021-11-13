@@ -1,0 +1,34 @@
+# we inherit settings from main .clang-tidy file
+InheritParentConfig: true
+
+Checks: '
+-cppcoreguidelines-avoid-non-const-global-variables,
+-cppcoreguidelines-avoid-magic-numbers,
+-cppcoreguidelines-special-member-functions,
+-cppcoreguidelines-owning-memory,
+-readability-magic-numbers,
+-readability-function-cognitive-complexity,
+-cppcoreguidelines-avoid-goto,
+-cppcoreguidelines-non-private-member-variables-in-classes,
+-hicpp-avoid-goto,
+-fuchsia-statically-constructed-objects,
+-misc-non-private-member-variables-in-classes,
+-cert-err58-cpp,
+-hicpp-special-member-functions
+'
+
+# '-' means that we remove option from check
+# most exclusions comes from errors in google test macros
+WarningsAsErrors: '
+-cppcoreguidelines-avoid-non-const-global-variables,
+-cppcoreguidelines-avoid-magic-numbers,
+-cppcoreguidelines-special-member-functions,
+-cppcoreguidelines-owning-memory,
+-readability-magic-numbers,
+-readability-function-cognitive-complexity,
+-cppcoreguidelines-avoid-goto,
+-cppcoreguidelines-non-private-member-variables-in-classes,
+-hicpp-avoid-goto,
+-fuchsia-statically-constructed-objects,
+-misc-non-private-member-variables-in-classes
+'
