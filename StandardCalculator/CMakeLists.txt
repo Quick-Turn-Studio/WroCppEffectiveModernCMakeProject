@@ -12,6 +12,10 @@ include(UseClangTidy)
 include(UseSanitizer)
 include(UseCodeCoverage)
 
+if (NOT CMAKE_OSX_ARCHITECTURES)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif()
+
 set(CMAKE_DEBUG_POSTFIX d)
 
 enable_testing()

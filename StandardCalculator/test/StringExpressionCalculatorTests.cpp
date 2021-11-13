@@ -1,9 +1,3 @@
-/*
- * Copyright (C) Quick Turn Studio GmbH - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- */
-
 #include <catch2/catch.hpp>
 
 #include <StringExpressionCalculator.h>
